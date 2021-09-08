@@ -325,7 +325,7 @@ def get_text_messages(message):
         bot.send_message(message.chat.id, text=question, reply_markup=keyboard)
     elif inp == 'хороший бот':
         bot.send_sticker(message.chat.id, 'CAACAgQAAxkBAAEC3eNhN1AmPxaFK0d46njtyDZnlKdbfQACUQADFXbpB-KSS5LVyjJ_IAQ')
-    elif laugh.issuperset(inp):
+    elif laugh.issuperset(inp) and len(inp) > 3:
         bot.send_sticker(message.chat.id, 'CAACAgQAAxkBAAEC3eFhN0_0gRR60XbapUVYGCjyZIj2OwACKAADFXbpBw_Cg-Mb1wfqIAQ')
 
 
