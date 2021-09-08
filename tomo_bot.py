@@ -298,7 +298,8 @@ laugh = {'х', 'а', 'a', 'h', 'x', ')'}
 
 bot = telebot.TeleBot(bot_token)
 
-print(str(datetime.datetime.now())[:-7] + ' // Bot online')
+timezone = datetime.timezone(datetime.timedelta(hours=+3))
+print(str(datetime.datetime.now(timezone))[:-13] + ' // Bot online')
 bot.send_message('269854203', str(datetime.datetime.now())[:-7] + ' // Bot online')
 
 

@@ -1,2 +1,4 @@
-s = {'х', 'а', 'a', 'h', 'x', ')'}
-print(s.issuperset(input()))
+import datetime
+
+timezone = datetime.timezone(datetime.timedelta(hours=+3))
+print(str(datetime.datetime.now(timezone))[:-13] + ' // Bot online')
