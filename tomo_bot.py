@@ -292,7 +292,11 @@ start_help = ('Напиши "Расписание", чтобы узнать ра
 schedule = {'расписание', 'hfcgbcfybt', 'raspisanie', 'schedule'}
 laugh = {'х', 'а', 'a', 'h', 'x', ')'}
 
-bot = telebot.TeleBot('')
+""""
+>>>>> САМ БОТ
+"""
+
+bot = telebot.TeleBot(bot_token)
 
 print(str(datetime.datetime.now())[:-7] + ' // Bot online')
 bot.send_message('269854203', str(datetime.datetime.now())[:-7] + ' // Bot online')
