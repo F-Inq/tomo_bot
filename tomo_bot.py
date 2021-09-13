@@ -28,11 +28,9 @@ w3 = ('Неделя №3\n\
 13.09 - 19.09\n\
 \n\
 Вторник:\n\
-16:20 - 17:50 // Физические принципы микро и оптоэлектроники (Д)\n\
-18:00 - 19:30 // Физические принципы микро и оптоэлектроники (Д)\n\
-\n\
-Среда:\n\
 14:20 - 15:50 // Технологии роста и обработки кристаллов (Д)\n\
+16:20 - 17:50 // Физические принципы микро и оптоэлектроники (каб. 200)\n\
+18:00 - 19:30 // Физические принципы микро и оптоэлектроники (каб. 200)\n\
 \n\
 Четверг:\n\
 12:40 - 14:10 // Технологии разработки оптоэлектронных систем (Д)\n\
@@ -284,7 +282,7 @@ weeks = (w1, w2, w3, w4, w5, w6, w7, w8, w9,
 delta = datetime.datetime.now() - datetime.datetime(2021, 8, 30)
 d = delta.days // 7
 this_week = weeks[d]
-next_week = weeks[d+1]
+next_week = weeks[d + 1]
 
 start_help = ('Напиши "Расписание", чтобы узнать расписание на текущую или следующую неделю;\
 \n\nНапиши номер недели, чтобы узнать на неё расписание.')
@@ -310,6 +308,7 @@ def start_command(message):
 
 @bot.message_handler(content_types=['text'])
 def get_text_messages(message):
+    global delta, d, this_week, next_week
     inp = message.text.lower()
     if inp.isdigit():
         inp = int(inp)
@@ -317,6 +316,10 @@ def get_text_messages(message):
             output = weeks[inp-1]
             bot.send_message(message.chat.id, output)
     elif inp in schedule:
+        delta = datetime.datetime.now() - datetime.datetime(2021, 8, 30)  # Проверка на неделю при вызове расписания
+        d = delta.days // 7
+        this_week = weeks[d]
+        next_week = weeks[d + 1]
         keyboard = types.InlineKeyboardMarkup()
         key_this = types.InlineKeyboardButton(text='Эта неделя', callback_data='this')
         keyboard.add(key_this)
