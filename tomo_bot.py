@@ -310,11 +310,12 @@ def start_command(message):
 def get_text_messages(message):
     global delta, d, this_week, next_week
     inp = message.text.lower()
+    inp_words = inp.split()
     if inp.isdigit():
         inp = int(inp)
         if 0 < inp < 18:
-            output = weeks[inp-1]
-            bot.send_message(message.chat.id, output)
+            bot.send_message(message.chat.id, weeks[inp-1])
+            bot.send_message('269854203', 'Someone used the bot')
     elif inp in schedule:
         delta = datetime.datetime.now() - datetime.datetime(2021, 8, 30)  # Проверка на неделю при вызове расписания
         d = delta.days // 7
@@ -327,10 +328,14 @@ def get_text_messages(message):
         keyboard.add(key_next)
         question = 'Узнать расписание:'
         bot.send_message(message.chat.id, text=question, reply_markup=keyboard)
+        bot.send_message('269854203', 'Someone used the bot')
     elif inp == 'хороший бот':
         bot.send_sticker(message.chat.id, 'CAACAgQAAxkBAAEC3eNhN1AmPxaFK0d46njtyDZnlKdbfQACUQADFXbpB-KSS5LVyjJ_IAQ')
     elif laugh.issuperset(inp) and len(inp) > 3:
-        bot.send_sticker(message.chat.id, 'CAACAgQAAxkBAAEC3eFhN0_0gRR60XbapUVYGCjyZIj2OwACKAADFXbpBw_Cg-Mb1wfqIAQ')
+        for word in inp_words:
+            word_chars = set(word)
+            if len(word_chars) > 1:
+                bot.send_sticker(message.chat.id, 'CAACAgQAAxkBAAEC3eFhN0_0gRR60XbapUVYGCjyZIj2OwACKAADFXbpBw_Cg-Mb1wfqIAQ')
 
 
 @bot.callback_query_handler(func=lambda call: True)
