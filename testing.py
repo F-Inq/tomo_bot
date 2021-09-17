@@ -1,4 +1,7 @@
-import datetime
+laugh = {'х', 'а', 'в', 'a', 'h', 'x', ')'}
+inp = 'ахахах ахах) хуй ахахвхахав'
 
-timezone = datetime.timezone(datetime.timedelta(hours=+3))
-print(str(datetime.datetime.now(timezone))[:-13] + ' // Bot online')
+if len(inp) > 3:
+    for word in inp.split():
+        if laugh.issuperset(word) and len(set(word)) > 1:
+            print('Laugh detected')

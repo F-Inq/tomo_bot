@@ -288,7 +288,7 @@ start_help = ('Напиши "Расписание", чтобы узнать ра
 \n\nНапиши номер недели, чтобы узнать на неё расписание.')
 
 schedule = {'расписание', 'hfcgbcfybt', 'raspisanie', 'schedule'}
-laugh = {'х', 'а', 'a', 'h', 'x', ')'}
+laugh = {'х', 'а', 'в', 'a', 'h', 'x', ')'}
 
 """"
 >>>>> САМ БОТ
@@ -331,10 +331,9 @@ def get_text_messages(message):
         bot.send_message('269854203', 'Someone used the bot')
     elif inp == 'хороший бот':
         bot.send_sticker(message.chat.id, 'CAACAgQAAxkBAAEC3eNhN1AmPxaFK0d46njtyDZnlKdbfQACUQADFXbpB-KSS5LVyjJ_IAQ')
-    elif laugh.issuperset(inp) and len(inp) > 3:
+    elif len(inp) > 3:
         for word in inp_words:
-            word_chars = set(word)
-            if len(word_chars) > 1:
+            if laugh.issuperset(word) and len(set(word)) > 1:
                 bot.send_sticker(message.chat.id, 'CAACAgQAAxkBAAEC3eFhN0_0gRR60XbapUVYGCjyZIj2OwACKAADFXbpBw_Cg-Mb1wfqIAQ')
 
 
