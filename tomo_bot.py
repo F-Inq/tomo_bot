@@ -310,7 +310,6 @@ def start_command(message):
 def get_text_messages(message):
     global delta, d, this_week, next_week
     inp = message.text.lower()
-    inp_words = inp.split()
     if inp.isdigit():
         inp = int(inp)
         if 0 < inp < 18:
@@ -331,18 +330,22 @@ def get_text_messages(message):
         bot.send_message('269854203', 'Someone used the bot')
     elif inp == 'хороший бот':
         bot.send_sticker(message.chat.id, 'CAACAgQAAxkBAAEC3eNhN1AmPxaFK0d46njtyDZnlKdbfQACUQADFXbpB-KSS5LVyjJ_IAQ')
-    elif len(inp) > 3:
-        for word in inp_words:
-            if laugh.issuperset(word) and len(set(word)) > 1:
+    for word in inp.split():
+        if 'папаха' not in word and 'запах' not in word and 'ваза' not in word:
+            if (laugh.issuperset(word.replace('п', '').replace('в', '').replace('з', ''))
+                    and len(word) > 3 and len(set(word)) > 1):
                 bot.send_sticker(message.chat.id, 'CAACAgQAAxkBAAEC3eFhN0_0gRR60XbapUVYGCjyZIj2OwACKAADFXbpBw_Cg-Mb1wfqIAQ')
+                break
 
 
 @bot.callback_query_handler(func=lambda call: True)
 def callback_worker(call):
     if call.data == 'this':
         bot.send_message(call.message.chat.id, this_week)
+        bot.send_message('269854203', 'Someone used the bot')
     elif call.data == 'next':
         bot.send_message(call.message.chat.id, next_week)
+        bot.send_message('269854203', 'Someone used the bot')
 
 
 while True:
