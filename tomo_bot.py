@@ -278,13 +278,6 @@ w17 = ('Неделя №17\n\
 weeks = (w1, w2, w3, w4, w5, w6, w7, w8, w9,
          w10, w11, w12, w13, w14, w15, w16, w17)
 
-d = (datetime.datetime.now() - datetime.datetime(2021, 8, 30)).days // 7  # Current week number check
-
-start_help = ('Напиши "Расписание", чтобы узнать расписание на текущую или следующую неделю;\
-\n\nНапиши номер недели, чтобы узнать на неё расписание.')
-schedule = {'расписание', 'hfcgbcfybt', 'raspisanie', 'schedule'}
-laugh = {'х', 'а', 'a', 'h', 'x', ')'}
-
 """"
 >>>>> THE BOT
 """
@@ -292,13 +285,21 @@ laugh = {'х', 'а', 'a', 'h', 'x', ')'}
 bot = telebot.TeleBot(bot_token)
 
 timezone = datetime.timezone(datetime.timedelta(hours=+3))
+d = (datetime.datetime.now() - datetime.datetime(2021, 8, 30)).days // 7  # Current week number check
 print(str(datetime.datetime.now(timezone))[:-13] + ' // Bot online')
 bot.send_message('269854203', str(datetime.datetime.now())[:-7] + ' // Bot online')  # PM to me that bot is now working
+
+start_help = ('Напиши "Расписание", чтобы узнать расписание на текущую или следующую неделю;\
+\n\nНапиши номер недели, чтобы узнать на неё расписание.')
 
 
 @bot.message_handler(commands=['start', 'help'])
 def start_command(message):
     bot.send_message(message.chat.id, start_help)
+
+
+schedule = {'расписание', 'hfcgbcfybt', 'raspisanie', 'schedule'}
+laugh = {'х', 'а', 'a', 'h', 'x', ')', 'п', 'в', 'з'}
 
 
 @bot.message_handler(content_types=['text'])
@@ -309,12 +310,11 @@ def get_text_messages(message):
         inp = int(inp)
         if 0 < inp < 18:
             bot.send_message(message.chat.id, weeks[inp-1])
-            bot.send_message('269854203', 'Someone used the bot')
+            bot.send_message('269854203', 'Someone requested schedule for week' + str(inp))
     else:
         for word in inp.split():
             if 'папаха' not in word and 'запах' not in word and 'ваза' not in word:
-                if (laugh.issuperset(word.replace('п', '').replace('в', '').replace('з', ''))
-                        and len(word) > 3 and len(set(word)) > 1):
+                if laugh.issuperset(set(word)) and len(word) > 3 and len(set(word)) > 1:
                     bot.send_sticker(message.chat.id,
                                      'CAACAgQAAxkBAAEC3eFhN0_0gRR60XbapUVYGCjyZIj2OwACKAADFXbpBw_Cg-Mb1wfqIAQ')
                     break
@@ -331,17 +331,16 @@ def get_text_messages(message):
         keyboard.add(key_next)
         question = 'Узнать расписание:'
         bot.send_message(message.chat.id, text=question, reply_markup=keyboard)
-        bot.send_message('269854203', 'Someone used the bot')
 
 
 @bot.callback_query_handler(func=lambda call: True)
 def callback_worker(call):
     if call.data == 'this':
         bot.send_message(call.message.chat.id, weeks[d])
-        bot.send_message('269854203', 'Someone used the bot')
+        bot.send_message('269854203', 'Someone requested schedule for this week')
     elif call.data == 'next':
         bot.send_message(call.message.chat.id, weeks[d + 1])
-        bot.send_message('269854203', 'Someone used the bot')
+        bot.send_message('269854203', 'Someone requested schedule for next week')
 
 
 while True:
@@ -349,4 +348,5 @@ while True:
         bot.polling(none_stop=True, interval=3)
     except Exception as e:
         print(e)
-        time.sleep(5)
+        time.sleep(3)
+        print(str(datetime.datetime.now(timezone))[:-13] + ' // Bot online')
