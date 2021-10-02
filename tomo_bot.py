@@ -285,7 +285,6 @@ weeks = (w1, w2, w3, w4, w5, w6, w7, w8, w9,
 bot = telebot.TeleBot(bot_token)
 
 timezone = datetime.timezone(datetime.timedelta(hours=+3))
-d = (datetime.datetime.now() - datetime.datetime(2021, 8, 30)).days // 7  # Current week number check
 print(str(datetime.datetime.now(timezone))[:-13] + ' // Bot online')
 bot.send_message('269854203', str(datetime.datetime.now())[:-7] + ' // Bot online')  # PM to me that bot is now working
 
@@ -302,28 +301,28 @@ schedule = {'расписание', 'hfcgbcfybt', 'raspisanie', 'schedule'}
 laugh = {'х', 'а', 'a', 'h', 'x', ')', 'п', 'в', 'з'}
 
 
+def detect_laugh(string):
+    for word in string.split():
+        if 'папаха' not in word and 'запах' not in word and 'ваза' not in word:
+            if laugh.issuperset(set(word)) and len(word) > 3 and len(set(word)) > 1:
+                return True
+
+
+def detect_bot(string):
+    for word in string.split():
+        if word == 'bot' or word == 'бот':
+            return True
+
+
 @bot.message_handler(content_types=['text'])
 def get_text_messages(message):
-    global d
     inp = message.text.lower()
     if inp.isdigit():
         inp = int(inp)
         if 0 < inp < 18:
             bot.send_message(message.chat.id, weeks[inp-1])
-            bot.send_message('269854203', 'Someone requested schedule for week' + str(inp))
-    else:
-        for word in inp.split():
-            if 'папаха' not in word and 'запах' not in word and 'ваза' not in word:
-                if laugh.issuperset(set(word)) and len(word) > 3 and len(set(word)) > 1:
-                    bot.send_sticker(message.chat.id,
-                                     'CAACAgQAAxkBAAEC3eFhN0_0gRR60XbapUVYGCjyZIj2OwACKAADFXbpBw_Cg-Mb1wfqIAQ')
-                    break
-            if word == 'bot' or word == 'бот':
-                bot.send_sticker(message.chat.id,
-                                 'CAACAgQAAxkBAAEC3eNhN1AmPxaFK0d46njtyDZnlKdbfQACUQADFXbpB-KSS5LVyjJ_IAQ')
-                break
-    if inp in schedule:
-        d = (datetime.datetime.now() - datetime.datetime(2021, 8, 30)).days // 7
+            bot.send_message('269854203', 'Someone requested schedule for week ' + str(inp))
+    elif inp in schedule:
         keyboard = types.InlineKeyboardMarkup()
         key_this = types.InlineKeyboardButton(text='Эта неделя', callback_data='this')
         keyboard.add(key_this)
@@ -331,10 +330,16 @@ def get_text_messages(message):
         keyboard.add(key_next)
         question = 'Узнать расписание:'
         bot.send_message(message.chat.id, text=question, reply_markup=keyboard)
+    else:
+        if detect_laugh(inp):
+            bot.send_sticker(message.chat.id, 'CAACAgQAAxkBAAEC3eFhN0_0gRR60XbapUVYGCjyZIj2OwACKAADFXbpBw_Cg-Mb1wfqIAQ')
+        if detect_bot(inp):
+            bot.send_sticker(message.chat.id, 'CAACAgQAAxkBAAEC3eNhN1AmPxaFK0d46njtyDZnlKdbfQACUQADFXbpB-KSS5LVyjJ_IAQ')
 
 
 @bot.callback_query_handler(func=lambda call: True)
 def callback_worker(call):
+    d = (datetime.datetime.now() - datetime.datetime(2021, 8, 30)).days // 7  # Current week number check
     if call.data == 'this':
         bot.send_message(call.message.chat.id, weeks[d])
         bot.send_message('269854203', 'Someone requested schedule for this week')
