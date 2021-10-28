@@ -1,7 +1,8 @@
-from datetime import timezone, timedelta, datetime
-from time import sleep
+import configparser
 import telebot
 from telebot import types
+from time import sleep
+from datetime import timezone, timedelta, datetime
 
 from weeks_schedule import weeks, bot_token, my_id
 
@@ -11,11 +12,10 @@ timezone = timezone(timedelta(hours=+3))
 print(str(datetime.now(timezone))[:-13] + ' // Bot online')
 bot.send_message(my_id, str(datetime.now())[:-7] + ' // Bot online')  # PM to me that bot is now working
 
-start_help = (
-    'Напиши "Расписание", чтобы узнать расписание на текущую или следующую неделю;\n\
-    \n\
-    Напиши номер недели, чтобы узнать на неё расписание.'
-)
+start_help = ('Напиши "Расписание", чтобы узнать расписание на текущую или следующую неделю;\n\
+\n\
+Напиши номер недели, чтобы узнать на неё расписание.'
+              )
 
 
 @bot.message_handler(commands=['start', 'help'])
@@ -41,6 +41,19 @@ def detect_bot(string):
 
 
 schedule = {'расписание', 'hfcgbcfybt', 'raspisanie', 'schedule'}
+config = configparser.ConfigParser()
+
+
+def week_schedule(week_n):
+    week_n = str(week_n)
+    config.read('schedule.ini', encoding="utf-8")
+    out = ''
+    for day, day_schedule in config.items(week_n):
+        if day_schedule:
+            out += day_schedule
+            if day != 'sat':
+                out += '\n\n'
+    return out
 
 
 @bot.message_handler(content_types=['text'])
@@ -49,7 +62,7 @@ def get_text_messages(message):
     if inp.isdigit():
         inp = int(inp)
         if 0 < inp < 18:
-            bot.send_message(message.chat.id, weeks[inp-1])
+            bot.send_message(message.chat.id, week_schedule(inp))
             bot.send_message(my_id, 'Someone requested schedule for week ' + str(inp))
     elif inp in schedule:
         keyboard = types.InlineKeyboardMarkup()

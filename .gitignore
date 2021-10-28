@@ -1,6 +1,5 @@
 .idea/
 __pycache__/
 original_code.py
-test.py
 testing.py
 weeks_schedule.py
