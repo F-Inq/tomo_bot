@@ -4,7 +4,7 @@ from telebot import types
 from time import sleep
 from datetime import timezone, timedelta, datetime
 
-from weeks_schedule import weeks, bot_token, my_id
+from private_info import bot_token, my_id
 
 bot = telebot.TeleBot(bot_token)
 
@@ -17,14 +17,11 @@ start_help = ('Напиши "Расписание", чтобы узнать ра
 Напиши номер недели, чтобы узнать на неё расписание.'
               )
 
-
-@bot.message_handler(commands=['start', 'help'])
-def start_command(message):
-    bot.send_message(message.chat.id, start_help)
-
-
 laugh = {'х', 'а', 'a', 'h', 'x', ')', 'п', 'в', 'з'}
 not_laugh = {'папаха', 'запах', 'ваза', 'ваха', 'ахав'}
+
+schedule = {'расписание', 'hfcgbcfybt', 'raspisanie', 'schedule'}
+config = configparser.ConfigParser()
 
 
 def detect_laugh(string):
@@ -40,10 +37,6 @@ def detect_bot(string):
             return True
 
 
-schedule = {'расписание', 'hfcgbcfybt', 'raspisanie', 'schedule'}
-config = configparser.ConfigParser()
-
-
 def week_schedule(week_n):
     week_n = str(week_n)
     config.read('schedule.ini', encoding="utf-8")
@@ -56,10 +49,18 @@ def week_schedule(week_n):
     return out
 
 
+@bot.message_handler(commands=['start', 'help'])
+def start_command(message):
+    bot.send_message(message.chat.id, start_help)
+
+
 @bot.message_handler(content_types=['text'])
 def get_text_messages(message):
     inp = message.text.lower()
-    if inp.isdigit():
+    if message.text == '/edit':
+        ans = bot.send_message(message.chat.id, 'Week number?')
+        bot.register_next_step_handler(ans, edit_week)
+    elif inp.isdigit():
         inp = int(inp)
         if 0 < inp < 18:
             bot.send_message(message.chat.id, week_schedule(inp))
@@ -83,16 +84,64 @@ def get_text_messages(message):
 def callback_worker(call):
     d = (datetime.now() - datetime(2021, 8, 30)).days // 7  # Current week number check
     if call.data == 'this':
-        bot.send_message(call.message.chat.id, weeks[d])
+        bot.send_message(call.message.chat.id, week_schedule(d + 1))
     elif call.data == 'next':
-        bot.send_message(call.message.chat.id, weeks[d + 1])
+        bot.send_message(call.message.chat.id, week_schedule(d + 2))
     bot.send_message(my_id, 'Someone requested schedule for ' + call.data + ' week')
+
+
+########################################################################################################################
+"""
+Editing schedule with the bot
+"""
+edit_info = {'week': '0', 'day': 'hed'}
+allowed_days = ('hed', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat')
+
+
+def edit_week(message):
+    global edit_info
+    try:
+        edited_week = int(message.text)
+        if 0 < edited_week < 18:
+            edit_info['week'] = str(edited_week)
+            ans = bot.send_message(message.chat.id, 'Day?')
+            bot.register_next_step_handler(ans, edit_day)
+        else:
+            bot.send_message(message.chat.id, 'Edit cancelled')
+    except ValueError:
+        bot.send_message(message.chat.id, 'Edit cancelled')
+
+
+def edit_day(message):
+    global edit_info
+    edited_day = str(message.text.lower())
+    if edited_day in allowed_days:
+        edit_info['day'] = edited_day
+        config.read('schedule.ini', encoding="utf-8")
+        bot.send_message(message.chat.id, config[edit_info['week']][edit_info['day']])
+        ans = bot.send_message(message.chat.id, '\nPlease send new schedule:')
+        bot.register_next_step_handler(ans, edit_schedule)
+    else:
+        bot.send_message(message.chat.id, 'Edit cancelled')
+
+
+def edit_schedule(message):
+    global edit_info
+    if message.text.lower() == 'stop' or message.text.lower() == 'стоп':
+        bot.send_message(message.chat.id, 'Edit cancelled')
+    else:
+        config[edit_info['week']][edit_info['day']] = message.text
+        with open('schedule.ini', 'w', encoding="utf-8") as configfile:
+            config.write(configfile)
+        bot.send_message(message.chat.id,
+                         'Edit done.\n'
+                         'New schedule for week ' + edit_info['week'] + ':\n\n' + week_schedule(int(edit_info['week'])))
 
 
 while True:
     try:
-        bot.polling(none_stop=True, interval=3)
+        bot.polling(none_stop=True, interval=2)
     except Exception as e:
         print(e)
-        sleep(3)
-        print(str(datetime.now(timezone))[:-13] + ' // Bot online')
+        sleep(2)
+        print(str(datetime.now(timezone))[:-13] + ' // Bot online // Exception')
