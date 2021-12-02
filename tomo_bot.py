@@ -3,6 +3,7 @@ import telebot
 from telebot import types
 from time import sleep
 from datetime import timezone, timedelta, datetime
+from string import punctuation
 
 from private_info import bot_token, my_id
 
@@ -17,11 +18,18 @@ start_help = ('Напиши "Расписание", чтобы узнать ра
 Напиши номер недели, чтобы узнать на неё расписание.'
               )
 
-laugh = {'х', 'а', 'a', 'h', 'x', ')', 'п', 'в', 'з'}
+laugh = {'х', 'а', 'a', 'h', 'x', 'п', 'в', 'з'}
 not_laugh = {'папаха', 'запах', 'ваза', 'ваха', 'ахав'}
 
 schedule = {'расписание', 'hfcgbcfybt', 'raspisanie', 'schedule'}
 config = configparser.ConfigParser()
+
+
+def strip_punctuation(string):
+    for char in string:
+        if char in punctuation:
+            string = string.replace(char, '')
+    return string
 
 
 def detect_laugh(string):
@@ -56,8 +64,8 @@ def start_command(message):
 
 @bot.message_handler(content_types=['text'])
 def get_text_messages(message):
-    inp = message.text.lower()
-    if message.text == '/edit':
+    inp = strip_punctuation(message.text.lower())
+    if message.text == '/edit':  # doesn't work as a command for some reason
         ans = bot.send_message(message.chat.id, 'Week number?')
         bot.register_next_step_handler(ans, edit_week)
     elif inp.isdigit():
