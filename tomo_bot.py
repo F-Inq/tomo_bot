@@ -25,27 +25,27 @@ schedule = {'расписание', 'hfcgbcfybt', 'raspisanie', 'schedule'}
 config = configparser.ConfigParser()
 
 
-def strip_punctuation(string):
+def strip_punctuation(string):  # removes all the punctuation from incoming message
     for char in string:
         if char in punctuation:
             string = string.replace(char, '')
     return string
 
 
-def detect_laugh(string):
+def detect_laugh(string):  # returns true if there is laugh in the incoming message
     for word in string.split():
         if (not any(x in word for x in not_laugh)
                 and laugh.issuperset(set(word)) and len(word) > 3 and len(set(word)) > 1):
             return True
 
 
-def detect_bot(string):
+def detect_bot(string):  # returns true if at least one of the words in the message is bot/бот
     for word in string.split():
         if word == 'bot' or word == 'бот':
             return True
 
 
-def week_schedule(week_n):
+def week_schedule(week_n):  # returns a schedule for a week number week_n
     week_n = str(week_n)
     config.read('schedule.ini', encoding="utf-8")
     out = ''
@@ -57,17 +57,17 @@ def week_schedule(week_n):
     return out
 
 
-@bot.message_handler(commands=['start', 'help'])
+@bot.message_handler(commands=['start', 'help'])  # start/help commands handler
 def start_command(message):
     bot.send_message(message.chat.id, start_help)
 
 
-@bot.message_handler(content_types=['text'])
+@bot.message_handler(content_types=['text'])  # main message handler
 def get_text_messages(message):
     inp = strip_punctuation(message.text.lower())
     if message.text == '/edit':  # doesn't work as a command for some reason
         ans = bot.send_message(message.chat.id, 'Week number?')
-        bot.register_next_step_handler(ans, edit_week)
+        bot.register_next_step_handler(ans, edit_week)  # launches edit_week(ans)
     elif inp.isdigit():
         inp = int(inp)
         if 0 < inp < 18:
@@ -88,7 +88,7 @@ def get_text_messages(message):
             bot.send_sticker(message.chat.id, 'CAACAgQAAxkBAAEC3eNhN1AmPxaFK0d46njtyDZnlKdbfQACUQADFXbpB-KSS5LVyjJ_IAQ')
 
 
-@bot.callback_query_handler(func=lambda call: True)
+@bot.callback_query_handler(func=lambda call: True)  # creates a keyboard with 'this-' and 'next week schedule' buttons
 def callback_worker(call):
     d = (datetime.now() - datetime(2021, 8, 30)).days // 7  # Current week number check
     if call.data == 'this':
@@ -151,5 +151,6 @@ while True:
         bot.polling(none_stop=True, interval=2)
     except Exception as e:
         print(e)
+        print(str(datetime.now(timezone))[:-13] + ' // Exception\n')
         sleep(2)
-        print(str(datetime.now(timezone))[:-13] + ' // Bot online // Exception')
+        print(str(datetime.now(timezone))[:-13] + ' // Bot online')
