@@ -19,8 +19,7 @@ start_help = ('Напиши "Расписание", чтобы узнать ра
               )
 
 laugh = {'х', 'а', 'a', 'h', 'x', 'п', 'в', 'з'}
-not_laugh = {'папаха', 'запах', 'ваза', 'ваха', 'ахав'}
-
+not_laugh = {'папаха', 'папах', 'запах', 'запаха', 'заппа', 'ахав', 'ваза', 'ваха', 'папа'}
 schedule = {'расписание', 'hfcgbcfybt', 'raspisanie', 'schedule'}
 config = configparser.ConfigParser()
 
@@ -34,8 +33,10 @@ def strip_punctuation(string):  # removes all the punctuation from incoming mess
 
 def detect_laugh(string):  # returns true if there is laugh in the incoming message
     for word in string.split():
-        if (not any(x in word for x in not_laugh)
-                and laugh.issuperset(set(word)) and len(word) > 3 and len(set(word)) > 1):
+        if (word not in not_laugh
+                and laugh.issuperset(set(word))  # word consists only of characters in {laugh}
+                and len(word) > 3  # ha and hah are okay
+                and len(set(word)) > 1):  # hhh / aaaa is not laugh
             return True
 
 
