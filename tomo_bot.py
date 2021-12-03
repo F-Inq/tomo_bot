@@ -73,7 +73,7 @@ def get_text_messages(message):
         if 0 < inp < 18:
             bot.send_message(message.chat.id, week_schedule(inp))
             bot.send_message(my_id, 'Someone requested schedule for week ' + str(inp))
-    elif inp in schedule:
+    elif inp in schedule:  # creates a keyboard with 'this-' and 'next week schedule' buttons
         keyboard = types.InlineKeyboardMarkup()
         key_this = types.InlineKeyboardButton(text='Эта неделя', callback_data='this')
         keyboard.add(key_this)
@@ -88,7 +88,7 @@ def get_text_messages(message):
             bot.send_sticker(message.chat.id, 'CAACAgQAAxkBAAEC3eNhN1AmPxaFK0d46njtyDZnlKdbfQACUQADFXbpB-KSS5LVyjJ_IAQ')
 
 
-@bot.callback_query_handler(func=lambda call: True)  # creates a keyboard with 'this-' and 'next week schedule' buttons
+@bot.callback_query_handler(func=lambda call: True)  # schedule keyboard button push handling
 def callback_worker(call):
     d = (datetime.now() - datetime(2021, 8, 30)).days // 7  # Current week number check
     if call.data == 'this':
