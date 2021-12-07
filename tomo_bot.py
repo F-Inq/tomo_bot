@@ -10,8 +10,8 @@ from private_info import bot_token, my_id
 bot = telebot.TeleBot(bot_token)
 
 timezone = timezone(timedelta(hours=+3))
-print(str(datetime.now(timezone))[:-13] + ' // Bot online')
-bot.send_message(my_id, str(datetime.now())[:-7] + ' // Bot online')  # PM to me that bot is now working
+print(f'{str(datetime.now(timezone))[:-13]} // Bot online')
+bot.send_message(my_id, f'{str(datetime.now())[:-7]} // Bot online')  # PM to me that bot is now working
 
 start_help = ('Напиши "Расписание", чтобы узнать расписание на текущую или следующую неделю;\n\
 \n\
@@ -73,7 +73,7 @@ def get_text_messages(message):
         inp = int(inp)
         if 0 < inp < 18:
             bot.send_message(message.chat.id, week_schedule(inp))
-            bot.send_message(my_id, 'Someone requested schedule for week ' + str(inp))
+            bot.send_message(my_id, f'Someone requested schedule for week {str(inp)}')
     elif inp in schedule:  # creates a keyboard with 'this-' and 'next week schedule' buttons
         keyboard = types.InlineKeyboardMarkup()
         key_this = types.InlineKeyboardButton(text='Эта неделя', callback_data='this')
@@ -96,7 +96,7 @@ def callback_worker(call):
         bot.send_message(call.message.chat.id, week_schedule(d + 1))
     elif call.data == 'next':
         bot.send_message(call.message.chat.id, week_schedule(d + 2))
-    bot.send_message(my_id, 'Someone requested schedule for ' + call.data + ' week')
+    bot.send_message(my_id, f'Someone requested schedule for {call.data} week')
 
 
 ########################################################################################################################
@@ -142,9 +142,9 @@ def edit_schedule(message):
         config[edit_info['week']][edit_info['day']] = message.text
         with open('schedule.ini', 'w', encoding="utf-8") as configfile:
             config.write(configfile)
-        bot.send_message(message.chat.id,
-                         'Edit done.\n'
-                         'New schedule for week ' + edit_info['week'] + ':\n\n' + week_schedule(int(edit_info['week'])))
+        bot.send_message(message.chat.id, f'Edit done.\n'
+                                          f'New schedule for week {edit_info["week"]}:')
+        bot.send_message(message.chat.id, f'{week_schedule(int(edit_info["week"]))}')
 
 
 while True:
