@@ -1,11 +1,9 @@
 import configparser
-import telebot
-from telebot import types
-from time import sleep
+from telebot import telebot, types
 from datetime import timezone, timedelta, datetime
 from string import punctuation
 
-from private_info import bot_token, my_id
+from private_info import bot_token, my_id, professors
 
 bot = telebot.TeleBot(bot_token)
 
@@ -47,15 +45,33 @@ def detect_bot(string):  # returns true if at least one of the words in the mess
 
 
 def week_schedule(week_n):  # returns a schedule for a week number week_n
-    week_n = str(week_n)
     config.read('schedule.ini', encoding="utf-8")
-    out = ''
-    for day, day_schedule in config.items(week_n):
+    out = []
+    for day, day_schedule in config.items(str(week_n)):
         if day_schedule:
-            out += day_schedule
-            if day != 'sat':
-                out += '\n\n'
+            out.append(day_schedule)
     return out
+
+
+def get_professor(name):  # works only for session week, returns all the exams with the said professor
+    config.read('schedule.ini', encoding="utf-8")
+    out = []
+    for day, day_schedule in config.items('session'):
+        if name in day_schedule:
+            out.append(day_schedule)
+    return out
+
+
+def send_schedule(chat, week_index):  # sends a message for each day in schedule for desired week
+    d = (datetime.now() - datetime(2021, 8, 30)).days // 7  # Current week number check
+
+    if week_index == 'this':  # conversion from call.data to integer index for current and next weeks
+        week_index = d + 1
+    elif week_index == 'next':
+        week_index = d + 2
+
+    for study_day in week_schedule(week_index):
+        bot.send_message(chat, study_day)
 
 
 @bot.message_handler(commands=['start', 'help'])  # start/help commands handler
@@ -72,14 +88,19 @@ def get_text_messages(message):
     elif inp.isdigit():
         inp = int(inp)
         if 0 < inp < 18:
-            bot.send_message(message.chat.id, week_schedule(inp))
+            send_schedule(message.chat.id, inp)
             bot.send_message(my_id, f'Someone requested schedule for week {str(inp)}')
-    elif inp in schedule:  # creates a keyboard with 'this-' and 'next week schedule' buttons
+    elif inp.title() in professors:  # checks if said professor's exams are needed
+        for exam in get_professor(inp.title()):
+            bot.send_message(message.chat.id, exam)
+    elif inp in schedule:  # creates a keyboard with 'this-', 'next week schedule' and 'session' buttons
         keyboard = types.InlineKeyboardMarkup()
         key_this = types.InlineKeyboardButton(text='Эта неделя', callback_data='this')
         keyboard.add(key_this)
         key_next = types.InlineKeyboardButton(text='Следующая неделя', callback_data='next')
         keyboard.add(key_next)
+        key_sess = types.InlineKeyboardButton(text='Сессия', callback_data='session')
+        keyboard.add(key_sess)
         question = 'Узнать расписание:'
         bot.send_message(message.chat.id, text=question, reply_markup=keyboard)
     else:
@@ -91,11 +112,7 @@ def get_text_messages(message):
 
 @bot.callback_query_handler(func=lambda call: True)  # schedule keyboard button push handling
 def callback_worker(call):
-    d = (datetime.now() - datetime(2021, 8, 30)).days // 7  # Current week number check
-    if call.data == 'this':
-        bot.send_message(call.message.chat.id, week_schedule(d + 1))
-    elif call.data == 'next':
-        bot.send_message(call.message.chat.id, week_schedule(d + 2))
+    send_schedule(call.message.chat.id, call.data)
     bot.send_message(my_id, f'Someone requested schedule for {call.data} week')
 
 
@@ -152,6 +169,6 @@ while True:
         bot.polling(none_stop=True, interval=2)
     except Exception as e:
         print(e)
-        print(str(datetime.now(timezone))[:-13] + ' // Exception\n')
-        sleep(2)
-        print(str(datetime.now(timezone))[:-13] + ' // Bot online')
+        print(f'{str(datetime.now(timezone))[:-13]} // Exception\n'
+              f'\n'
+              f'{str(datetime.now(timezone))[:-13]} // Bot online')
