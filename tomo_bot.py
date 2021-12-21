@@ -147,8 +147,11 @@ def edit_day(message):
     if edited_day in allowed_days:
         edit_info['day'] = edited_day
         config.read('schedule.ini', encoding="utf-8")
-        bot.send_message(message.chat.id, config[edit_info['week']][edit_info['day']])
-        ans = bot.send_message(message.chat.id, '\nPlease send new schedule:')
+        if config[edit_info['week']][edit_info['day']]:  # checks if schedule for that day is not empty
+            bot.send_message(message.chat.id, config[edit_info['week']][edit_info['day']])  # and sends it if it isn't
+        else:
+            bot.send_message(message.chat.id, 'There are no classes that day')
+        ans = bot.send_message(message.chat.id, 'Please send new schedule:')
         bot.register_next_step_handler(ans, edit_schedule)
     else:
         bot.send_message(message.chat.id, 'Edit cancelled')
@@ -156,15 +159,20 @@ def edit_day(message):
 
 def edit_schedule(message):
     global edit_info
-    if message.text.lower() == 'stop' or message.text.lower() == 'стоп':
+    if message.text.lower() == 'stop' or message.text.lower() == 'стоп':  # stop keyword for exiting edit process
         bot.send_message(message.chat.id, 'Edit cancelled')
-    else:
+        pass
+    elif message.text.lower() == 'none':  # none keyword for removing all classes from that day in schedule
+        config[edit_info['week']][edit_info['day']] = ''
+    else:  # if something else than none is written, take it as the new schedule for that day
         config[edit_info['week']][edit_info['day']] = message.text
-        with open('schedule.ini', 'w', encoding="utf-8") as configfile:
-            config.write(configfile)
-        bot.send_message(message.chat.id, f'Edit done.\n'
-                                          f'New schedule for week {edit_info["week"]}:')
-        bot.send_message(message.chat.id, f'{week_schedule(int(edit_info["week"]))}')
+
+    with open('schedule.ini', 'w', encoding="utf-8") as configfile:
+        config.write(configfile)
+
+    bot.send_message(message.chat.id, f'Edit done.\n'
+                                      f'New schedule for week {edit_info["week"]}:')
+    send_schedule(message.chat.id, int(edit_info["week"]))
 
 
 while True:
