@@ -19,6 +19,7 @@ start_help = ('Напиши "Расписание", чтобы узнать ра
 laugh = {'х', 'а', 'a', 'h', 'x', 'п', 'в', 'з'}
 not_laugh = {'папаха', 'папах', 'запах', 'запаха', 'заппа', 'ахав', 'ваза', 'ваха', 'папа'}
 schedule = {'расписание', 'hfcgbcfybt', 'raspisanie', 'schedule'}
+session = {'сессия', 'ctccbz', 'sessiya', 'session'}
 config = configparser.ConfigParser()
 
 
@@ -93,6 +94,8 @@ def get_text_messages(message):
     elif inp.title() in professors:  # checks if said professor's exams are needed
         for exam in get_professor(inp.title()):
             bot.send_message(message.chat.id, exam)
+    elif inp in session:
+        send_schedule(message.chat.id, 'session')
     elif inp in schedule:  # creates a keyboard with 'this-', 'next week schedule' and 'session' buttons
         keyboard = types.InlineKeyboardMarkup()
         key_this = types.InlineKeyboardButton(text='Эта неделя', callback_data='this')
